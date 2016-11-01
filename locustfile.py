@@ -1,5 +1,6 @@
 import requests
 import random
+import time
 
 from realbrowserlocusts import PhantomJSLocust
 
@@ -8,44 +9,42 @@ from locust import TaskSet, task
 
 class LocustUserBehavior(TaskSet):
 
-    def _login(self):
-        self.username = requests.get('http://127.0.0.1:5000/').text
-        self.client.implicitly_wait(30)
-        self.client.get('https://www.sportpursuit-stage.com/customer/account/login')
-        self.client.find_element_by_name('login[username]').send_keys(self.username)
-        self.client.find_element_by_name('login[password]').send_keys('password1234')
-        self.client.find_element_by_name('send').click()
+    def _signup(self):
+        self.username = self._generate_test_email_address() 
+        self.client.implicitly_wait(10)
+        self.client.get('https://www.sportpursuit-stage.com/customer/account/create')
+        self.client.implicitly_wait(10)
+        time.sleep(5)
+        self.client.get_screenshot_as_file('screenshot.jpg')
+#        self.client.find_element_by_name('email').send_keys(self.username)
+#        self.client.find_element_by_name('password').send_keys('password1234')
+#        self.client.find_element_by_id('joinnow').click()
+#        time.sleep(5)
+#        self.client.find_element_by_xpath("//form[@id='form-validate-customer-first-login']/div/input").click()
 
     def _logout(self):
-        requests.get('http://127.0.0.1:5000/%s' % self.username)
         self.client.get('https://www.sportpursuit-stage.com/customer/account/logout/')
 
     def _one_item_checkout(self):
-        self.client.get('https://www.sportpursuit-stage.com/')
-        sales = self.client.find_elements_by_class_name('sale')
-        random.choice(sales).click()
+        # Add to basket
+        self.client.get('https://www.sportpursuit-stage.com/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/494643')
 
+        # Checkout
+        self.client.get('https://www.sportpursuit-stage.com/checkout/prime/')
 
-    def _two_item_checkout(self):
-        self.client.get('https://www.sportpursuit-stage.com/')
-        sales = self.client.find_elements_by_class_name('sale')
-        random.choice(sales).click()
+        # enter delivery info
+        # click 'continue to payment'
+        # enter payment info
+        # click place order
+
+    def _generate_test_email_address(self):
+        return 'webtest-%s@sportpursuit.co.uk' % str(int(time.time()))
 
     @task(1)
     def shop(self):
-        self.client.timed_event_for_locust("", "Login", self._login)
-
-        try:
-            event = random.choice([
-                ("", "One Item Checkout", self._one_item_checkout),
-                ("", "Two Item Checkout", self._two_item_checkout)
-            ])
-
-            self.client.timed_event_for_locust(*event)
-        except:
-            raise
-        finally:
-            self.client.timed_event_for_locust("", "Logout", self._logout)
+        self.client.timed_event_for_locust("", "Signup", self._signup)
+        self.client.timed_event_for_locust("", "Order", self._signup)
+        self.client.timed_event_for_locust("", "Logout", self._logout)
 
 
 class LocustUser(PhantomJSLocust):
