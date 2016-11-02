@@ -2,7 +2,7 @@ import requests
 import random
 import time
 
-from realbrowserlocusts import PhantomJSLocust
+from realbrowserlocusts import PhantomJSLocust, FirefoxLocust
 
 from locust import TaskSet, task
 
@@ -14,7 +14,6 @@ class LocustUserBehavior(TaskSet):
         self.client.implicitly_wait(10)
         self.client.get('https://www.sportpursuit-stage.com/customer/account/create')
         self.client.implicitly_wait(10)
-        time.sleep(5)
         self.client.find_element_by_name('email').send_keys(self.username)
         self.client.find_element_by_name('password').send_keys('password1234')
         self.client.find_element_by_id('joinnow').click()
@@ -28,28 +27,43 @@ class LocustUserBehavior(TaskSet):
 
         # Checkout
         self.client.get('https://www.sportpursuit-stage.com/checkout/prime/')
-        time.sleep(5)
-
-        self.client.save_screenshot('screenshot1.jpg')
-
-        self.client.find_element_by_xpath('//li[@id="opc-shipping-tab"]/div/h2/span').click()
-
-        time.sleep(5)
-        self.client.save_screenshot('screenshot2.jpg')
 
         # enter delivery info
         self.client.find_element_by_id('shipping:firstname').send_keys('Test')
         self.client.find_element_by_id('shipping:lastname').send_keys('Test')
-        self.client.find_element_by_id('shipping:country_id').send_keys('Test')
+        self.client.find_element_by_id('shipping:postcode').send_keys('SW12 9ER')
         self.client.find_element_by_id('shipping:street1').send_keys('Test')
         self.client.find_element_by_id('shipping:city').send_keys('Test')
         self.client.find_element_by_id('shipping:telephone').send_keys('123123123')
 
-        self.client.save_screenshot('screenshot3.jpg')
+        # click 'calculate shipping'
+        self.client.find_element_by_xpath('//span[text()="Continue to payment"]').click()
+        time.sleep(5)
 
         # click 'continue to payment'
+        self.client.find_element_by_xpath('//span[text()="Continue to payment"]').click()
+        time.sleep(5)
+
         # enter payment info
+        self.client.switch_to.frame(self.client.find_element_by_id('braintree-hosted-field-number'))
+        self.client.find_element_by_id('credit-card-number').send_keys('4111111111111111')
+        self.client.switch_to.default_content()
+
+        self.client.switch_to.frame(self.client.find_element_by_id('braintree-hosted-field-expirationMonth'))
+        self.client.find_element_by_id('expiration-month').send_keys('02')
+        self.client.switch_to.default_content()
+
+        self.client.switch_to.frame(self.client.find_element_by_id('braintree-hosted-field-expirationYear'))
+        self.client.find_element_by_id('expiration-year').send_keys('20')
+        self.client.switch_to.default_content()
+
+        self.client.switch_to.frame(self.client.find_element_by_id('braintree-hosted-field-cvv'))
+        self.client.find_element_by_id('cvv').send_keys('123')
+        self.client.switch_to.default_content()
+
         # click place order
+        self.client.find_element_by_xpath('//button[contains(@class, "btn-place-order")]/span/span').click()
+        time.sleep(30)
 
     def _generate_test_email_address(self):
         return 'webtest-%s@sportpursuit.co.uk' % str(int(time.time()))
@@ -61,7 +75,8 @@ class LocustUserBehavior(TaskSet):
         self.client.timed_event_for_locust("", "Logout", self._logout)
 
 
-class LocustUser(PhantomJSLocust):
+#class LocustUser(PhantomJSLocust):
+class LocustUser(FirefoxLocust):
 
     timeout = 30 #in seconds in waitUntil thingies
     min_wait = 100
