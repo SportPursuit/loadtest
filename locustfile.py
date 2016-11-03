@@ -5,7 +5,8 @@ import time
 from realbrowserlocusts import PhantomJSLocust, FirefoxLocust
 
 from locust import TaskSet, task
-
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 class LocustUserBehavior(TaskSet):
 
@@ -21,7 +22,11 @@ class LocustUserBehavior(TaskSet):
     def _logout(self):
         self.client.get('https://www.sportpursuit-stage.com/customer/account/logout/')
 
-    def _checkout(self):
+    def _place_order(self):
+
+        # Signup
+        self._signup()
+
         # Add to basket
         self.client.get('https://www.sportpursuit-stage.com/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/494643')
 
@@ -38,11 +43,11 @@ class LocustUserBehavior(TaskSet):
 
         # click 'calculate shipping'
         self.client.find_element_by_xpath('//span[text()="Continue to payment"]').click()
-        time.sleep(5)
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//label[@for="s_method_tablerate_bestway"]')), "Shipping cost is visible")
 
         # click 'continue to payment'
         self.client.find_element_by_xpath('//span[text()="Continue to payment"]').click()
-        time.sleep(5)
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//h2[text()="Payment Method"]')), "Payment page visible")
 
         # enter payment info
         self.client.switch_to.frame(self.client.find_element_by_id('braintree-hosted-field-number'))
@@ -63,16 +68,17 @@ class LocustUserBehavior(TaskSet):
 
         # click place order
         self.client.find_element_by_xpath('//button[contains(@class, "btn-place-order")]/span/span').click()
-        time.sleep(30)
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//div[contains(@class, "success-order")]')), "Order success popup is visible")
+
+        # Logout
+        self._logout()
 
     def _generate_test_email_address(self):
-        return 'webtest-%s@sportpursuit.co.uk' % str(int(time.time()))
+        return 'webtest-%s@sportpursuit.co.uk' % str(time.time())
 
     @task(1)
     def shop(self):
-        self.client.timed_event_for_locust("", "Signup", self._signup)
-        self.client.timed_event_for_locust("", "Order", self._checkout)
-        self.client.timed_event_for_locust("", "Logout", self._logout)
+        self.client.timed_event_for_locust("", "Place order", self._place_order)
 
 
 #class LocustUser(PhantomJSLocust):
