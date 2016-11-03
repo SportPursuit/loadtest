@@ -21,6 +21,7 @@ class LocustUserBehavior(TaskSet):
 
     def _logout(self):
         self.client.get('https://www.sportpursuit-stage.com/customer/account/logout/')
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//h2[text()="Hello, Welcome Back"]')), "Customer is logged out")
 
     def _place_order(self):
 
