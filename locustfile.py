@@ -11,19 +11,22 @@ from selenium.webdriver.support import expected_conditions as EC
 class LocustUserBehavior(TaskSet):
 
     def _signup(self):
-        self.username = self._generate_test_email_address() 
-        self.client.implicitly_wait(10)
+
         self.client.get('https://www.sportpursuit-stage.com/customer/account/create')
-        self.client.implicitly_wait(10)
-        self.client.find_element_by_name('email').send_keys(self.username)
+
+        self.client.find_element_by_name('email').send_keys(self._generate_test_email_address())
         self.client.find_element_by_name('password').send_keys('password1234')
         self.client.find_element_by_id('joinnow').click()
 
-    def _logout(self):
-        self.client.get('https://www.sportpursuit-stage.com/customer/account/logout/')
-        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//h2[text()="Hello, Welcome Back"]')), "Customer is logged out")
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//h2[text()="Congratulations on joining SportPursuit"]')), "Welcome popup not found")
 
     def _place_order(self):
+
+        # Restart the browser
+        self.client.restart()
+
+        # Set implicit wait 
+        self.client.implicitly_wait(10)
 
         # Signup
         self._signup()
@@ -71,9 +74,6 @@ class LocustUserBehavior(TaskSet):
         self.client.find_element_by_xpath('//button[contains(@class, "btn-place-order")]/span/span').click()
         self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//div[contains(@class, "success-order")]')), "Order success popup is visible")
 
-        # Logout
-        self._logout()
-
     def _generate_test_email_address(self):
         return 'webtest-%s@sportpursuit.co.uk' % str(time.time())
 
@@ -94,3 +94,4 @@ class LocustUser(FirefoxLocust):
     screen_width = 1200
     screen_height = 600
     task_set = LocustUserBehavior
+    headless = False
