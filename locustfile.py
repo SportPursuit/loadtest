@@ -97,3 +97,4 @@ class LocustUser(FirefoxLocust):
     screen_width = 1200
     screen_height = 600
     task_set = LocustUserBehavior
+    headless = False
