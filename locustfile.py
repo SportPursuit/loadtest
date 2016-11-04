@@ -81,10 +81,13 @@ class LocustUserBehavior(TaskSet):
     def shop(self):
         self.client.timed_event_for_locust("", "Place order", self._place_order)
 
+        self.client.restart_client()
+
 
 #class LocustUser(PhantomJSLocust):
 class LocustUser(FirefoxLocust):
 
+    headless = False
     timeout = 30 #in seconds in waitUntil thingies
     min_wait = 100
     max_wait = 1000
