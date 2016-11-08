@@ -10,9 +10,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class LocustUserBehavior(TaskSet):
 
+    base_url = 'https://wws.sportpursuit-stage.com'
+
     def _signup(self):
 
-        self.client.get('https://www.sportpursuit-stage.com/customer/account/create')
+        self.client.get(self.base_url + '/customer/account/create')
 
         self.client.find_element_by_name('email').send_keys(self._generate_test_email_address())
         self.client.find_element_by_name('password').send_keys('password1234')
@@ -32,10 +34,10 @@ class LocustUserBehavior(TaskSet):
         self._signup()
 
         # Add to basket
-        self.client.get('https://www.sportpursuit-stage.com/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/494643')
+        self.client.get(self.base_url + '/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/494643')
 
         # Checkout
-        self.client.get('https://www.sportpursuit-stage.com/checkout/prime/')
+        self.client.get(self.base_url + '/checkout/prime/')
 
         # enter delivery info
         self.client.find_element_by_id('shipping:firstname').send_keys('Test')
