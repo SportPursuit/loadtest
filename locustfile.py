@@ -24,10 +24,6 @@ class LocustUserBehavior(TaskSet):
 
     def _place_order(self):
 
-        # Restart the browser
-        self.client.restart()
-
-        # Set implicit wait 
         self.client.implicitly_wait(10)
 
         # Signup
