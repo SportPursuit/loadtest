@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class LocustUserBehavior(TaskSet):
 
-    base_url = 'https://www.sportpursuit-stage.com'
+    base_url = 'https://www.1.sportpursuit-uat.com'
 
     def _signup(self):
 
