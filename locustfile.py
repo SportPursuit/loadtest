@@ -50,9 +50,11 @@ class LocustUserBehavior(TaskSet):
 
 class LocustUser(PhantomJSLocust):
 
+    headless = True
     timeout = 30 #in seconds in waitUntil thingies
     min_wait = 100
     max_wait = 1000
     screen_width = 1200
     screen_height = 600
     task_set = LocustUserBehavior
+
