@@ -85,7 +85,7 @@ class LocustUserBehavior(TaskSet):
 #class LocustUser(PhantomJSLocust):
 class LocustUser(FirefoxLocust):
 
-    headless = False
+    headless = True
     timeout = 30 #in seconds in waitUntil thingies
     min_wait = 100
     max_wait = 1000
