@@ -29,8 +29,11 @@ class LocustUserBehavior(TaskSet):
         # Signup
         self._signup()
 
-        # Add to basket
-        self.client.get(self.base_url + '/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/494643')
+        # Add random from list to basket
+
+        products = ['494643', '862983']
+
+        self.client.get(self.base_url + '/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuMS5zcG9ydHB1cnN1aXQtdWF0LmNvbS9jYXRhbG9nL3Byb2R1Y3Qvdmlldy9pZC80OTQ2NDMv/product/' +  random.choice(products))
 
         # Checkout
         self.client.get(self.base_url + '/checkout/prime/')
