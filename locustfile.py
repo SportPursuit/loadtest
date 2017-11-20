@@ -2,7 +2,7 @@ import requests
 import random
 import time
 
-from realbrowserlocusts import PhantomJSLocust, FirefoxLocust
+from realbrowserlocusts import HeadlessChromeLocust
 
 from locust import TaskSet, task
 from selenium.webdriver.common.by import By
@@ -72,6 +72,9 @@ class LocustUserBehavior(TaskSet):
         self.client.find_element_by_xpath('//button[contains(@class, "btn-place-order")]/span/span').click()
         self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//div[contains(@class, "success-order")]')), "Order success popup is visible")
 
+        self.client.get(self.base_url + '/customer/account/logout/')
+        self.client.wait.until(EC.visibility_of_element_located((By.XPATH, '//h1[text()="You are now logged out"]')), "Logged out popup didn't appear")
+
     def _generate_test_email_address(self):
         return 'webtest-%s@sportpursuit.co.uk' % str(time.time())
 
@@ -79,13 +82,11 @@ class LocustUserBehavior(TaskSet):
     def shop(self):
         self.client.timed_event_for_locust("", "Place order", self._place_order)
 
-        self.client.restart_client()
-
 
 #class LocustUser(PhantomJSLocust):
-class LocustUser(FirefoxLocust):
+#class LocustUser(FirefoxLocust):
+class LocustUser(HeadlessChromeLocust):
 
-    headless = True
     timeout = 30 #in seconds in waitUntil thingies
     min_wait = 100
     max_wait = 1000
